@@ -74,7 +74,7 @@ public class PaintManager : MonoBehaviour {
 			}
 		}
 	}
-	private void Paint(Texture2D texture, Vector2 position, Color color,BrushSize brush = BrushSize.SMALL){
+	private void Paint(Texture2D texture, Vector2 position, Color color, BrushSize brush = BrushSize.SMALL){
 		/*
 		Dado uma textura, uma posicao, uma cor e um tipo de pincel, esta funcao chama PaintWithBrush com parametros dependendo do tamanho do pincel.
 		*/
@@ -96,7 +96,7 @@ public class PaintManager : MonoBehaviour {
 		*/
 		for(int i = 0; i < 7; i++){
 			for(int j = 0; j < 7; j++){
-				if(brushMap[i,j] == 1) texture.SetPixel(x - 7 + i, y - 7 + j, color);
+				if(brushMap[i,j] == 1) texture.SetPixel(x - (7 / 2) + i, y - (7 / 2) + j, color);
 			}
 		}
 		texture.Apply();
