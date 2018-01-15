@@ -35,6 +35,9 @@ public class PaintManager : MonoBehaviour {
 												{1,1,1,1,1,1,1},
 												{0,1,1,1,1,1,0},
 												{0,0,1,1,1,0,0}};
+	
+	private bool interpolatePixels;
+	public Vector2 lastPosition;
 
 	private void Start(){
 		Application.targetFrameRate = 300;
@@ -43,8 +46,10 @@ public class PaintManager : MonoBehaviour {
 		ClearTexture(Color.white);
 	}
 	private void Update(){
+		InterpolationFlag();
 		if(texture != null) PaintLoop();
 		if(Input.GetKey(KeyCode.C)) ClearTexture(Color.white);
+
 	}
 	private void InitializeTexture(int[] size, FilterMode mode = FilterMode.Point){
 		/*
@@ -70,7 +75,11 @@ public class PaintManager : MonoBehaviour {
 		if(Input.GetMouseButton(0)){
 			if(Physics.Raycast(ray, out hit,Mathf.Infinity)){
 				Vector2 pixelCoordinate = CoordinateFromRaycastHit(hit);
+				if(interpolatePixels){
+					PaintWithBresenhamPixelInterpolation(lastPosition,pixelCoordinate);
+				}
 				Paint(texture,pixelCoordinate,currentColor,brush);
+				lastPosition = pixelCoordinate;
 			}
 		}
 	}
@@ -78,6 +87,7 @@ public class PaintManager : MonoBehaviour {
 		/*
 		Dado uma textura, uma posicao, uma cor e um tipo de pincel, esta funcao chama PaintWithBrush com parametros dependendo do tamanho do pincel.
 		*/
+		lastPosition = position;
 		switch(brush){
 			case BrushSize.SMALL:
 				PaintWithBrush(smallBrush, (int) position.x, (int)position.y, color);
@@ -88,6 +98,34 @@ public class PaintManager : MonoBehaviour {
 			case BrushSize.BIG:
 				PaintWithBrush(bigBrush, (int) position.x, (int)position.y, color);
 				break;
+		}
+	}
+	private void PaintWithBresenhamPixelInterpolation(Vector2 a, Vector2 b){
+		/*
+		Usa o algoritmo de Bresenham para interpolar dois pontos e formar uma reta pixelada. Para cada passo a funcao Paint() eh chamada.
+		*/
+		int x0, y0, x1, y1;
+		x0 = (int) a.x;
+		x1 = (int) b.x;
+		y0 = (int) a.y;
+		y1 = (int) b.y;
+
+		int dx = Mathf.Abs(x1 - x0);										//Diferenca de distancias no eixo x
+		int dy = Mathf.Abs(y1 - y0);										//Diferenca de distancias no eixo y
+		int sx = x0 < x1 ? 1 : -1;											//Direcao que deve 'andar' no eixo x
+		int sy = y0 < y1 ? 1 : -1;											//Direcao que deve 'andar no eixo y
+		int err = (dx > dy ? dx : -dy)/2;									//Erro da "pixelizacao"
+		int e2;
+
+		while(true){
+			if( x0 == x1 && y0 == y1 ) return;
+			e2 = err;
+			if (e2 > -dx) {
+				err -= dy; x0 += sx; 
+			}if (e2 < dy) {
+				err += dx; y0 += sy;
+			}
+			Paint(texture, new Vector2(x0,y0),currentColor,brush);
 		}
 	}
 	private void PaintWithBrush(int[,] brushMap,int x, int y, Color color){
@@ -124,6 +162,26 @@ public class PaintManager : MonoBehaviour {
 		uv.y = -(hit.point.y - hit.collider.bounds.min.y) / hit.collider.bounds.size.y;
 		uv.y *= canvasSize[1];
 		return uv;
+	}
+	public void SelectColor(int index){
+		currentColor = colors[index];
+	}
+	public void SelectBrush(int index){
+		switch(index){
+			case 0:
+				brush = BrushSize.SMALL;
+				break;
+			case 1:
+				brush = BrushSize.MEDIUM;
+				break;
+			case 2:
+				brush = BrushSize.BIG;
+				break;
+		}
+	}
+	private void InterpolationFlag(){
+		if(Input.GetMouseButtonUp(0)) interpolatePixels = false;
+		if(Input.GetMouseButton(0) && !Input.GetMouseButtonDown(0)) interpolatePixels = true;
 	}
 }
 public enum BrushSize{
