@@ -10,6 +10,11 @@ public class StageManager : MonoBehaviour {
     [SerializeField] private TimerBar bonusBar;
     [SerializeField] private Scoreboard scoreboard;
 
+    [SerializeField] private Image introScreen;
+    [SerializeField] private Text introText;
+    [SerializeField] private Text start;
+    [SerializeField] private Text timeOut;
+
     [Header("Paint references")]
     [SerializeField] private PaintManager paintManager;
     [SerializeField] private Renderer paintedImage;
@@ -32,8 +37,14 @@ public class StageManager : MonoBehaviour {
     public float bonusBarDecreaseRatio = 1;
     public int startingStageTimeValue = 30;
 
+    [Header("Animation Preferences")]
+    [SerializeField] private float introFadeSpeed;
+    [SerializeField] private float startTimeOutAnimationSpeed = 0.025f;
+    [SerializeField] private float maxSize = 1.5f;
+
     void Start() {
         stageState = StageState.Intro;
+        introScreen.gameObject.SetActive(true);
     }
 
     void Update () {
@@ -42,6 +53,7 @@ public class StageManager : MonoBehaviour {
                 if (Input.GetKeyDown(KeyCode.Space)) {
                     StartCoroutine(SetStageTimer(startingStageTimeValue));
                     SetSession();
+                    StartCoroutine( IntroScreenAnimation() );
                 }
             break;
 
@@ -129,7 +141,6 @@ public class StageManager : MonoBehaviour {
         stageState = StageState.Playing;
     }
 
-
     IEnumerator SetStageTimer(int startValue){
         string format = "000";
         int value = startValue;
@@ -141,11 +152,42 @@ public class StageManager : MonoBehaviour {
             }
 
             SetGameplay(false);
+            StartCoroutine( IncreaseScaleAnimation(timeOut,2f) );
             bonusBar.StopTimer();
             stageState = StageState.Results;
         }
     }
 
+    IEnumerator IntroScreenAnimation(){
+        while(introScreen.color.a != 0){
+            float currentValue = Mathf.MoveTowards( introScreen.color.a,0,introFadeSpeed);
+            
+            introScreen.color = new Color(introScreen.color.r,
+                                          introScreen.color.g,
+                                          introScreen.color.b,
+                                          currentValue);
+            introText.color = new Color (introText.color.r,
+                                         introText.color.g,
+                                         introText.color.b,
+                                         currentValue);
+            yield return new WaitForEndOfFrame();
+        }
+        introScreen.gameObject.SetActive(false);
+        yield return IncreaseScaleAnimation(start);
+    }
+    IEnumerator IncreaseScaleAnimation(Text img, float stopTime = 0){
+        float initialScale = img.transform.localScale.x;
+        img.gameObject.SetActive(true);
+        while(img.transform.localScale.x != maxSize){
+            float currentValue = Mathf.MoveTowards(img.transform.localScale.x,maxSize,startTimeOutAnimationSpeed);
+            print(currentValue);
+            img.transform.localScale = new Vector3(currentValue,currentValue,1);
+            yield return new WaitForEndOfFrame();
+        }
+        yield return new WaitForSeconds(stopTime);
+        img.gameObject.SetActive(false);
+        img.transform.localScale = new Vector3(initialScale,initialScale,1);
+    }
     //solução temporária, organizar melhor depois
     private void SetGameplay(bool value) {
         paintManager.enabled = value;
