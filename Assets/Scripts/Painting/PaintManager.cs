@@ -47,7 +47,7 @@ public class PaintManager : MonoBehaviour {
 	}
 	private void Update(){
 		InterpolationFlag();
-		if(texture != null) PaintLoop();
+		if(texture != null) PaintLoop(); 
 		if(Input.GetKey(KeyCode.C)) ClearTexture(Color.white);
 
 	}
@@ -139,7 +139,7 @@ public class PaintManager : MonoBehaviour {
 		}
 		texture.Apply();
 	}
-	private void ClearTexture(Color c) {
+	public void ClearTexture(Color c) {
 		/*
 		Percorre todos os pixels da textura e os pinta de uma cor c.
 		*/

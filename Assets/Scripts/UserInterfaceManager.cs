@@ -14,12 +14,13 @@ public class UserInterfaceManager : MonoBehaviour {
 	[SerializeField] private int colorButtonIndex;
 	[SerializeField] private int brushButtonIndex;
 
-	private PaintManager paintManager;
+    private PaintManager paintManager;
 
 	private void Start(){
 		paintManager = GameObject.Find("PaintManager").GetComponent<PaintManager>();
 		ResetSelection();
-	}
+        SelectBrush(1);
+    }
 	public void SelectColor(int index){
 		colorButtons[colorButtonIndex].transform.GetChild(0).gameObject.SetActive(false);
 		colorButtonIndex = index;
@@ -44,6 +45,7 @@ public class UserInterfaceManager : MonoBehaviour {
 		SelectColor(0);
 		SelectBrush(0);
 	}
+    public void StartBonusTimer() {
 
-
+    }
 }

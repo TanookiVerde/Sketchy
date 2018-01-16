@@ -7,8 +7,8 @@ public class ImageComparator{
     public static float CheckSimilarity(Texture2D newImage, Texture2D originalImage) {
         Color strokeColor = Color.black;
 
-        int similarity = 0,
-            strokePixels = 0;
+        float similarity = 0,
+              strokePixels = 0;
 
         int canvasWidth = originalImage.width, 
             canvasHeight = originalImage.height;
@@ -30,9 +30,9 @@ public class ImageComparator{
                 if (newImage.GetPixel(x, y) == strokeColor)
                 {
                     if (auxImage.GetPixel(x, y) == newImage.GetPixel(x, y)) {
-                        similarity++;
+                        similarity+=1;
                     } else {
-                        similarity--;
+                        similarity-=.5f;
                     }
                 }
             }
@@ -45,7 +45,7 @@ public class ImageComparator{
         * Busca a porcentagem de similaridade entre os strokes, e não na imagem toda
         * Isso é necessário para que o sistema atual de texture map funcione 
         */
-        float result = ((float)similarity / strokePixels);
+        float result = (similarity / strokePixels);
         Debug.Log("result: " + result);
         return result;
     }
@@ -64,7 +64,7 @@ public class ImageComparator{
                 if(originalImage.GetPixel(x,y) == strokeColor) {
 
                     //basicamente PaintWithBrush()
-                    int diameter = 10;
+                    int diameter = 14;
                     for (int i = 0; i < diameter; i++) {
                         for (int j = 0; j < diameter; j++) {
                             handicapMap.SetPixel(x - (diameter / 2) + i, y - (diameter / 2) + j, strokeColor /*Color.red*/);
