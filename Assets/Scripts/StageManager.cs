@@ -152,7 +152,7 @@ public class StageManager : MonoBehaviour {
             }
 
             SetGameplay(false);
-            StartCoroutine( IncreaseScaleAnimation(timeOut,2f) );
+            StartCoroutine( DecreaseScaleAnimation(timeOut,2f) );
             bonusBar.StopTimer();
             stageState = StageState.Results;
         }
@@ -180,13 +180,34 @@ public class StageManager : MonoBehaviour {
         img.gameObject.SetActive(true);
         while(img.transform.localScale.x != maxSize){
             float currentValue = Mathf.MoveTowards(img.transform.localScale.x,maxSize,startTimeOutAnimationSpeed);
-            print(currentValue);
             img.transform.localScale = new Vector3(currentValue,currentValue,1);
             yield return new WaitForEndOfFrame();
         }
         yield return new WaitForSeconds(stopTime);
+        while(img.color.a != 0){
+            float currentValue = Mathf.MoveTowards( img.color.a,0,introFadeSpeed);
+            img.color = new Color(img.color.r, img.color.g, img.color.b, currentValue);
+            yield return new WaitForEndOfFrame();   
+        }
         img.gameObject.SetActive(false);
         img.transform.localScale = new Vector3(initialScale,initialScale,1);
+    }
+    IEnumerator DecreaseScaleAnimation(Text img, float stopTime = 0){
+        img.gameObject.SetActive(true);
+        img.transform.localScale = new Vector3(maxSize,maxSize,1);
+        while(img.transform.localScale.x != 1){
+            float currentValue = Mathf.MoveTowards(img.transform.localScale.x,1,startTimeOutAnimationSpeed);
+            img.transform.localScale = new Vector3(currentValue,currentValue,1);
+            yield return new WaitForEndOfFrame();
+        }
+        yield return new WaitForSeconds(stopTime);
+        while(img.color.a != 0){
+            float currentValue = Mathf.MoveTowards( img.color.a,0,introFadeSpeed);
+            img.color = new Color(img.color.r, img.color.g, img.color.b, currentValue);
+            yield return new WaitForEndOfFrame();   
+        }
+        img.gameObject.SetActive(false);
+        img.transform.localScale = new Vector3(maxSize,maxSize,1);
     }
     //solução temporária, organizar melhor depois
     private void SetGameplay(bool value) {
