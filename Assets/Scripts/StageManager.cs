@@ -45,7 +45,11 @@ public class StageManager : MonoBehaviour {
     [SerializeField] private float startTimeOutAnimationSpeed = 0.025f;
     [SerializeField] private float maxSize = 1.5f;
 
+    private GameplayMusicManager gMusicManager;
+
     void Start() {
+        gMusicManager = GameObject.Find("MusicManager").GetComponent<GameplayMusicManager>();
+
         stageState = StageState.Intro;
         introScreen.gameObject.SetActive(true);
         currentImage = originalSprite.sprite;
@@ -130,6 +134,7 @@ public class StageManager : MonoBehaviour {
 
     IEnumerator SessionTransition(float time) {
         bonusBar.StopTimer();
+        gMusicManager.PlaySound(Sounds.TURNPAGE);
 
         if (overlapImage) {
             overlapImage.sprite = currentImage;
@@ -167,13 +172,18 @@ public class StageManager : MonoBehaviour {
     IEnumerator SetStageTimer(int startValue){
         string format = "000";
         int value = startValue;
+        bool pitchChanged = false;
+
         if (stageTimer) {
             stageTimer.text = value.ToString(format);
             while (value > 0) {
                 yield return new WaitForSecondsRealtime(1);
                 stageTimer.text = (--value).ToString(format);
+                if(!pitchChanged && value < 15){
+                    StartCoroutine(gMusicManager.IncreasePitch());
+                    pitchChanged = true;
+                }
             }
-
             SetGameplay(false);
             float _t = 2f;
             StartCoroutine(DecreaseScaleAnimation(timeOut, _t) );
@@ -265,5 +275,7 @@ public class StageManager : MonoBehaviour {
     private void setResultScreen() {
         hiscoreScreen.setCurrentScore(scoreboard.GetScore());
         hiscoreScreen.setHiscore(scoreboard.GetScore());
+
+        gMusicManager.PlaySound(Sounds.STAR);
     }
 }

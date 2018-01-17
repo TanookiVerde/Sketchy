@@ -38,8 +38,11 @@ public class PaintManager : MonoBehaviour {
 	
 	private bool interpolatePixels;
 	public Vector2 lastPosition;
+	private GameplayMusicManager gMusicManager;
 
 	private void Start(){
+		gMusicManager = GameObject.Find("MusicManager").GetComponent<GameplayMusicManager>();
+
 		Application.targetFrameRate = 300;
 		InitializeTexture(canvasSize);
 		AttachTexture();
@@ -80,8 +83,10 @@ public class PaintManager : MonoBehaviour {
 				}
 				Paint(texture,pixelCoordinate,currentColor,brush);
 				lastPosition = pixelCoordinate;
+				if(Input.GetMouseButtonDown(0)) gMusicManager.PlaySound(Sounds.SCRIBBLE);
 			}
 		}
+		if(Input.GetMouseButtonUp(0)) gMusicManager.StopSound();
 	}
 	private void Paint(Texture2D texture, Vector2 position, Color color, BrushSize brush = BrushSize.SMALL){
 		/*

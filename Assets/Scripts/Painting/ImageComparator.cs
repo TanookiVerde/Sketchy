@@ -46,7 +46,7 @@ public class ImageComparator{
         * Isso é necessário para que o sistema atual de texture map funcione 
         */
         float result = (similarity / strokePixels);
-        Debug.Log("result: " + result);
+        //Debug.Log("result: " + result);
         return result;
     }
 
