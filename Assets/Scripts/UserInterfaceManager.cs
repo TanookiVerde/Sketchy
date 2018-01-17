@@ -19,7 +19,7 @@ public class UserInterfaceManager : MonoBehaviour {
 	private void Start(){
 		paintManager = GameObject.Find("PaintManager").GetComponent<PaintManager>();
 		ResetSelection();
-        SelectBrush(1);
+        SelectBrush(2);
     }
 	public void SelectColor(int index){
 		colorButtons[colorButtonIndex].transform.GetChild(0).gameObject.SetActive(false);

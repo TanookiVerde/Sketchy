@@ -32,7 +32,7 @@ public class ImageComparator{
                     if (auxImage.GetPixel(x, y) == newImage.GetPixel(x, y)) {
                         similarity+=1;
                     } else {
-                        similarity-=.5f;
+                        similarity-=.4f;
                     }
                 }
             }

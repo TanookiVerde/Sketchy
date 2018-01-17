@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class StageManager : MonoBehaviour {
     [Header("UI References")]
@@ -14,6 +15,7 @@ public class StageManager : MonoBehaviour {
     [SerializeField] private Text introText;
     [SerializeField] private Text start;
     [SerializeField] private Text timeOut;
+    [SerializeField] private HiscoreScreen hiscoreScreen;
 
     [Header("Paint references")]
     [SerializeField] private PaintManager paintManager;
@@ -36,6 +38,7 @@ public class StageManager : MonoBehaviour {
     //melhorar esse nomes porque deus pai
     public float bonusBarDecreaseRatio = 1;
     public int startingStageTimeValue = 30;
+    bool sendTrigger;
 
     [Header("Animation Preferences")]
     [SerializeField] private float introFadeSpeed;
@@ -45,15 +48,26 @@ public class StageManager : MonoBehaviour {
     void Start() {
         stageState = StageState.Intro;
         introScreen.gameObject.SetActive(true);
+        currentImage = originalSprite.sprite;
     }
 
     void Update () {
         switch (stageState) {
             case StageState.Intro:
-                if (Input.GetKeyDown(KeyCode.Space)) {
-                    StartCoroutine(SetStageTimer(startingStageTimeValue));
-                    SetSession();
-                    StartCoroutine( IntroScreenAnimation() );
+                if (Input.GetKeyDown(KeyCode.Space) || getSendTrigger()) {
+                    int similarityPercent = SimilarityCheck();
+
+                    //show result feedback
+                    if (similarityPercent < 40) {
+                        //miss
+
+                        //Pisca imagem de overlap e resetta session
+                        StartCoroutine(SessionTransition(1.2f));
+                    } else {
+                        StartCoroutine(SetStageTimer(startingStageTimeValue));
+                        SetSession();
+                        StartCoroutine(IntroScreenAnimation());
+                    }
                 }
             break;
 
@@ -69,14 +83,8 @@ public class StageManager : MonoBehaviour {
                 }
 
 
-                if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(2)) {
-                    Sprite _sprite = originalSprite.sprite;
-                    Texture2D drawingTex = paintedImage.sharedMaterial.mainTexture as Texture2D;
-                    float similarityValue = ImageComparator.CheckSimilarity(drawingTex, _sprite.texture);
-
-                    //Gera e apresenta a porcentagem de semelhança
-                    int similarityPercent = ProcessSimilarityValue(similarityValue);
-                    if(resemblanceValue) resemblanceValue.text = similarityPercent + "%";
+                if (Input.GetKeyDown(KeyCode.Space) || getSendTrigger()) {
+                    int similarityPercent = SimilarityCheck();
 
                     //Adiciona pontiação ao score da fase
                     scoreboard.AddScore(similarityPercent / 2, bonusBar.getValue());
@@ -94,6 +102,17 @@ public class StageManager : MonoBehaviour {
         }
 
 	}
+
+    private int SimilarityCheck() {
+        Sprite _sprite = originalSprite.sprite;
+        Texture2D drawingTex = paintedImage.sharedMaterial.mainTexture as Texture2D;
+        float similarityValue = ImageComparator.CheckSimilarity(drawingTex, _sprite.texture);
+
+        //Gera e apresenta a porcentagem de semelhança
+        int similarityPercent = ProcessSimilarityValue(similarityValue);
+        if (resemblanceValue) resemblanceValue.text = similarityPercent + "%";
+        return similarityPercent;
+    }
 
     private int ProcessSimilarityValue(float value) {
         int result = (int)(value * 100);
@@ -119,7 +138,11 @@ public class StageManager : MonoBehaviour {
             overlapImage.gameObject.SetActive(false);
         }
 
-        SetSession();
+        if (stageState == StageState.Transition) {
+            SetSession();
+        } else {
+            if (paintManager) paintManager.ClearTexture(Color.white);
+        }
     }
 
     private void SetSession() {
@@ -152,8 +175,16 @@ public class StageManager : MonoBehaviour {
             }
 
             SetGameplay(false);
-            StartCoroutine( DecreaseScaleAnimation(timeOut,2f) );
+            float _t = 2f;
+            StartCoroutine(DecreaseScaleAnimation(timeOut, _t) );
             bonusBar.StopTimer();
+
+            yield return new WaitForSecondsRealtime(_t);
+            if (hiscoreScreen)
+            {
+                hiscoreScreen.gameObject.SetActive(true);
+                setResultScreen();
+            }
             stageState = StageState.Results;
         }
     }
@@ -209,8 +240,30 @@ public class StageManager : MonoBehaviour {
         img.gameObject.SetActive(false);
         img.transform.localScale = new Vector3(maxSize,maxSize,1);
     }
+
     //solução temporária, organizar melhor depois
     private void SetGameplay(bool value) {
         paintManager.enabled = value;
+    }
+
+    public void setSendTrigger() {
+        sendTrigger = true;
+    }
+
+    private bool getSendTrigger() {
+        if (sendTrigger) {
+            sendTrigger = false;
+            return true;
+        }
+        return false;
+    }
+
+    public void resetScene() {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    private void setResultScreen() {
+        hiscoreScreen.setCurrentScore(scoreboard.GetScore());
+        hiscoreScreen.setHiscore(scoreboard.GetScore());
     }
 }
