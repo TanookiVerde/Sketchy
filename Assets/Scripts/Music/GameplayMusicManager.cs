@@ -33,6 +33,13 @@ public class GameplayMusicManager : MonoBehaviour {
 	public void StopSound(){
 		sfxAudioSource.Stop();
 	}
+	public void StopAllSound(){
+		myAudioSource.Stop();
+		sfxAudioSource.Stop();
+	}
+	public void DecreaseVolume(){
+		myAudioSource.volume *= 0.5f;
+	}
 	public IEnumerator IncreasePitch(){
 		myAudioSource.pitch = 1;
 		for(int i = 0; i < 20; i++){

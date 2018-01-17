@@ -190,6 +190,8 @@ public class StageManager : MonoBehaviour {
             bonusBar.StopTimer();
 
             yield return new WaitForSecondsRealtime(_t);
+            gMusicManager.DecreaseVolume();
+            
             if (hiscoreScreen)
             {
                 hiscoreScreen.gameObject.SetActive(true);

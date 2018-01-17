@@ -453,7 +453,7 @@ MonoBehaviour:
   - {fileID: 21300000, guid: fa2e0285b4323474da1d434d94f288ce, type: 3}
   - {fileID: 21300000, guid: 60599887db15977429ce6e4091c4cf63, type: 3}
   bonusBarDecreaseRatio: 150
-  startingStageTimeValue: 60
+  startingStageTimeValue: 20
   introFadeSpeed: 0.04
   startTimeOutAnimationSpeed: 0.025
   maxSize: 1.5
