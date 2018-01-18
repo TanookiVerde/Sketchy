@@ -17,6 +17,8 @@ public class StageManager : MonoBehaviour {
     [SerializeField] private Text timeOut;
     [SerializeField] private HiscoreScreen hiscoreScreen;
 
+    [SerializeField] private Text moreTime;
+
     [Header("Paint references")]
     [SerializeField] private PaintManager paintManager;
     [SerializeField] private Renderer paintedImage;
@@ -38,19 +40,30 @@ public class StageManager : MonoBehaviour {
     //melhorar esse nomes porque deus pai
     public float bonusBarDecreaseRatio = 1;
     public int startingStageTimeValue = 30;
+    public int timeForHundredPercent = 20; //tempo em segundo para 100%. PS.: eh proporcional a porcentagem
     bool sendTrigger;
 
     [Header("Animation Preferences")]
+    //INTRO AND ENDING
     [SerializeField] private float introFadeSpeed;
     [SerializeField] private float startTimeOutAnimationSpeed = 0.025f;
     [SerializeField] private float maxSize = 1.5f;
+    //TIMER
+    [SerializeField] private float timerMaxSize = 1.25f;
+    [SerializeField] private float timerAnimSpeed = 0.01f;
+    //MORETIME
+    [SerializeField] private float moreTimeDistance = 20;
+    [SerializeField] private float moreTimeSpeed = 0.3f;
 
     private GameplayMusicManager gMusicManager;
+    private float timeValue;
+    private Coroutine timeEnding;
 
     void Start() {
         gMusicManager = GameObject.Find("MusicManager").GetComponent<GameplayMusicManager>();
 
         stageState = StageState.Intro;
+        stageTimer.color = Color.black;
         introScreen.gameObject.SetActive(true);
         currentImage = originalSprite.sprite;
     }
@@ -92,6 +105,11 @@ public class StageManager : MonoBehaviour {
 
                     //Adiciona pontiação ao score da fase
                     scoreboard.AddScore(similarityPercent / 2, bonusBar.getValue());
+
+                    //adiciona tempo
+                    int timeAdd = (int) (similarityPercent*0.01f*timeForHundredPercent);
+                    timeValue += timeAdd;
+                    StartCoroutine(MoreTime(timeAdd));
 
                     //Pisca imagem de overlap e resetta session
                     StartCoroutine(SessionTransition(1.2f));
@@ -171,17 +189,24 @@ public class StageManager : MonoBehaviour {
 
     IEnumerator SetStageTimer(int startValue){
         string format = "000";
-        int value = startValue;
+        //int value = startValue;
+        timeValue = startValue;
         bool pitchChanged = false;
 
         if (stageTimer) {
-            stageTimer.text = value.ToString(format);
-            while (value > 0) {
+            stageTimer.text = timeValue.ToString(format);
+            while (timeValue > 0) {
                 yield return new WaitForSecondsRealtime(1);
-                stageTimer.text = (--value).ToString(format);
-                if(!pitchChanged && value < 15){
+                stageTimer.text = (--timeValue).ToString(format);
+                if(!pitchChanged && timeValue < 15){
+                    timeEnding = StartCoroutine(TimeEndingAnimation());
                     StartCoroutine(gMusicManager.IncreasePitch());
                     pitchChanged = true;
+                }
+                if(pitchChanged && timeValue > 15){
+                    BackToNormalTime();
+                    gMusicManager.ResetPitch();
+                    pitchChanged = false;
                 }
             }
             SetGameplay(false);
@@ -253,6 +278,44 @@ public class StageManager : MonoBehaviour {
         img.transform.localScale = new Vector3(maxSize,maxSize,1);
     }
 
+    IEnumerator TimeEndingAnimation(){
+        float currentValue = 1f;
+        stageTimer.color = Color.red;
+        while(true){
+            while(currentValue != timerMaxSize){
+                currentValue = Mathf.MoveTowards(currentValue,timerMaxSize,timerAnimSpeed);
+                stageTimer.transform.localScale = new Vector3(currentValue,currentValue,1f);
+                yield return new WaitForEndOfFrame();
+            }
+            while(currentValue != 1f){
+                currentValue = Mathf.MoveTowards(currentValue,1f,timerAnimSpeed);
+                stageTimer.transform.localScale = new Vector3(currentValue,currentValue,1f);
+                yield return new WaitForEndOfFrame();
+            }
+        }
+    }
+    IEnumerator MoreTime(int time){
+        moreTime.gameObject.SetActive(true);
+        moreTime.text = "+"+time;
+        float posY = moreTime.rectTransform.anchoredPosition.y;
+        float currentValue = posY;
+        float target = posY + moreTimeDistance;
+        while(currentValue != target){
+            currentValue = Mathf.MoveTowards(currentValue,target,moreTimeSpeed);
+            moreTime.rectTransform.anchoredPosition = new Vector2(moreTime.rectTransform.anchoredPosition.x,currentValue);
+            yield return new WaitForEndOfFrame();
+        }
+        moreTime.rectTransform.anchoredPosition = new Vector2(moreTime.rectTransform.anchoredPosition.x, posY);
+        moreTime.gameObject.SetActive(false);
+    }
+    private void BackToNormalTime(){
+        if(timeEnding != null) {
+            StopCoroutine(timeEnding);
+            print(timeEnding);
+        }
+        stageTimer.transform.localScale = new Vector3(1,1,1);
+        stageTimer.color = Color.black;
+    }
     //solução temporária, organizar melhor depois
     private void SetGameplay(bool value) {
         paintManager.enabled = value;
