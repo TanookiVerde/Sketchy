@@ -152,7 +152,6 @@ public class StageManager : MonoBehaviour {
 
     IEnumerator SessionTransition(float time) {
         bonusBar.StopTimer();
-        gMusicManager.PlaySound(Sounds.TURNPAGE);
 
         if (overlapImage) {
             overlapImage.sprite = currentImage;
@@ -181,9 +180,9 @@ public class StageManager : MonoBehaviour {
         originalSprite.sprite = currentImage;
 
         if (paintManager) paintManager.ClearTexture(Color.white);
-
         if (bonusBar) bonusBar.StartTimer(bonusBarDecreaseRatio);
 
+        gMusicManager.PlaySound(Sounds.TURNPAGE);
         stageState = StageState.Playing;
     }
 

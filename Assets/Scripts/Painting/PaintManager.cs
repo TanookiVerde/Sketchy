@@ -76,7 +76,7 @@ public class PaintManager : MonoBehaviour {
 		RaycastHit hit;
 
 		if(Input.GetMouseButton(0)){
-			if(Physics.Raycast(ray, out hit,Mathf.Infinity)){
+            if (Physics.Raycast(ray, out hit,Mathf.Infinity)){
 				Vector2 pixelCoordinate = CoordinateFromRaycastHit(hit);
 				if(interpolatePixels){
 					PaintWithBresenhamPixelInterpolation(lastPosition,pixelCoordinate);
