@@ -49,6 +49,8 @@ public class PaintManager : MonoBehaviour {
 		ClearTexture(Color.white);
 	}
 	private void Update(){
+		ChangeBrushOnMouseScroll();
+		ChangeColorOnMouseButton();
 		InterpolationFlag();
 		if(texture != null) PaintLoop(); 
 		if(Input.GetKey(KeyCode.C)) ClearTexture(Color.white);
@@ -75,7 +77,7 @@ public class PaintManager : MonoBehaviour {
 		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 		RaycastHit hit;
 
-		if(Input.GetMouseButton(0)){
+		if(Input.GetMouseButton(0) || Input.GetMouseButton(1)){
             if (Physics.Raycast(ray, out hit,Mathf.Infinity)){
 				Vector2 pixelCoordinate = CoordinateFromRaycastHit(hit);
 				if(interpolatePixels){
@@ -155,6 +157,16 @@ public class PaintManager : MonoBehaviour {
 		}
 		texture.Apply();
 	}
+	private void ChangeColorOnMouseButton(){
+		if(Input.GetMouseButton(0)) GameObject.Find("UI").GetComponent<UserInterfaceManager>().SelectColor(0);
+		if(Input.GetMouseButton(1)) GameObject.Find("UI").GetComponent<UserInterfaceManager>().SelectColor(1);
+	}
+	private void ChangeBrushOnMouseScroll(){
+		UserInterfaceManager u = GameObject.Find("UI").GetComponent<UserInterfaceManager>();
+		int i = u.GetCurrentBrush();
+		if(Input.GetAxis("Mouse ScrollWheel") > 0) u.SelectBrush(++i);
+		if(Input.GetAxis("Mouse ScrollWheel") < 0) u.SelectBrush(--i);
+	}
 	private Vector2 CoordinateFromRaycastHit(RaycastHit hit){
 		/*
 		Calcula a partir da colisão com o plano a coordenada do pixel selecionado.
@@ -185,8 +197,13 @@ public class PaintManager : MonoBehaviour {
 		}
 	}
 	private void InterpolationFlag(){
+		//0
 		if(Input.GetMouseButtonUp(0)) interpolatePixels = false;
 		if(Input.GetMouseButton(0) && !Input.GetMouseButtonDown(0)) interpolatePixels = true;
+		//1
+		if(Input.GetMouseButtonUp(1)) interpolatePixels = false;
+		if(Input.GetMouseButton(1) && !Input.GetMouseButtonDown(1)) interpolatePixels = true;
+
 	}
 }
 public enum BrushSize{

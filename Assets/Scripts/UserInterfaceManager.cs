@@ -29,6 +29,9 @@ public class UserInterfaceManager : MonoBehaviour {
 		paintManager.SelectColor(index);
 	}
 	public void SelectBrush(int index){
+		if(index > 2) index = 0;
+		if(index < 0) index = 2;
+		print(index);
 		brushButtons[brushButtonIndex].transform.GetChild(0).gameObject.SetActive(false);
 		brushButtonIndex = index;
 		brushButtons[brushButtonIndex].transform.GetChild(0).gameObject.SetActive(true);
@@ -45,7 +48,7 @@ public class UserInterfaceManager : MonoBehaviour {
 		SelectColor(0);
 		SelectBrush(0);
 	}
-    public void StartBonusTimer() {
-
-    }
+    public int GetCurrentBrush(){
+		return brushButtonIndex;
+	}
 }
