@@ -40,7 +40,7 @@ public class StageManager : MonoBehaviour {
     //melhorar esse nomes porque deus pai
     public float bonusBarDecreaseRatio = 1;
     public int startingStageTimeValue = 30;
-    public int timeForHundredPercent = 20; //tempo em segundo para 100%. PS.: eh proporcional a porcentagem
+    public int timeForHundredPercent = 10; //tempo em segundo para 100%. PS.: eh proporcional a porcentagem
     bool sendTrigger;
 
     [Header("Animation Preferences")]
@@ -107,7 +107,7 @@ public class StageManager : MonoBehaviour {
                     scoreboard.AddScore(similarityPercent / 2, bonusBar.getValue());
 
                     //adiciona tempo
-                    int timeAdd = (int) (similarityPercent*0.01f*timeForHundredPercent);
+                    int timeAdd = (int) (similarityPercent * 0.01f * timeForHundredPercent);
                     timeValue += timeAdd;
                     StartCoroutine(MoreTime(timeAdd));
 
